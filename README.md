@@ -3,11 +3,11 @@
 当前版本以视频展示为主，结构为：
 
 1. 论文标题与概览视频。
-2. **四排场景视频**：Factory Conveyor、Circular Motion、Home Tabletop、Embodied Interaction。
-3. **五排 OOD 视频**：Object、Background、Lighting、Speed、Joint。
+2. **四排 ID 场景视频**：Factory Conveyor、Circular Motion、Home Tabletop、Embodied Interaction，各 10 个任务。
+3. **OOD 精选视频**：Object、Background、Lighting、Speed 各 4 个案例；Joint 保留待补充说明。
 4. 实验结果图与完整数据表。
 
-共九排独立横向视频长廊，每排暂放六个占位视频，数量可调整。每排支持箭头切换、键盘操作和触摸滑动；视频下方放简短说明。字体统一为 Arial / Helvetica 无衬线字体。
+四排 ID 已接入 40 个 Level 2 的 state-machine 任务演示，共 120 段视频。四排 OOD 各精选 4 个案例，每排覆盖 FC、CM、HT、EI，共 16 个案例、48 段视频。所有任务卡都可切换 Overview、Front、Wrist 三个视角，支持箭头、键盘和触摸滑动。Joint 尚无素材，保留一行说明；首页概览已接入 `MotionForge_Video.mp4`。字体统一为 Arial / Helvetica。
 
 参考 [π₀ 项目页](https://www.pi.website/blog/pi0) 的横向视频长廊交互，独立实现，不使用其代码或素材。
 
@@ -33,37 +33,45 @@ base_url: '/MotionForge-Website/'
 
 ## 填入视频
 
-所有素材入口在 `content.js`，所有素材文件放在 `assets/media/`。目前仅使用占位画面，没有提取论文图片，没有虚构实验视频。
+所有素材入口在 `content.js`，任务素材文件放在 `assets/media/`，首页概览视频使用根目录的 `MotionForge_Video.mp4`。已接入的 ID 素材来自 2026-09-17 批次，HRI 统一归为 EI，详情见 [`assets/media/id/README.md`](assets/media/id/README.md) 和 [`manifest.json`](assets/media/id/manifest.json)。封面为相应视频中提取的真实帧，保存为同目录、同名 `.webp`。
+
+OOD 来自 2026-09-19 批次，仅将精选的 16 组复制到 [`assets/media/ood/`](assets/media/ood/README.md)，原始批次完整保留并排除在 Git 之外。案例与对应 ID 画面对照后选择，优先呈现明显的视觉变化，并为每个案例选择合适的默认镜头和真实帧封面。选用案例、原始任务和设置的对应关系见 [OOD 素材索引](assets/media/ood/manifest.json)。视频点击后加载，封面接近可视区域时加载。
 
 ### 开头概览
 
-将 `MOTIONFORGE_MEDIA.overview` 从 `null` 改为：
+`MOTIONFORGE_MEDIA.overview` 已配置为：
 
 ```js
 {
   type: 'video',
-  src: 'assets/media/overview.mp4',
+  src: 'MotionForge_Video.mp4',
   poster: 'assets/media/overview.webp',
-  alt: 'MotionForge overview'
+  alt: 'MotionForge overview',
+  muted: false
 }
 ```
 
-也可以使用 `type: 'image'` 提供开头图片。视频按原始比例完整显示；若需要 16:9 开头布局，调整 `styles.css` 中 `.hero-stage` 的 `aspect-ratio`。
+封面取自视频真实画面，视频点击后加载并带声音播放，支持暂停、进度拖动及全屏。桌面和手机均按视频原始比例完整显示。更换视频时同步更新路径和封面。
 
 ### 九排视频长廊
 
-`MOTIONFORGE_GALLERIES` 数组里每个对象对应一排，`videos` 数组里每个对象对应一个视频。例如：
+`MOTIONFORGE_GALLERIES` 中每个对象对应一排，`videos` 中每个对象对应一张任务卡。`src` / `poster` 设置默认视角；`views` 可选，用于提供多个镜头。例如（`taskPath` 为任务的 `level2` 目录）：
 
 ```js
 {
-  title: 'Intercepting a moving object',
-  src: 'assets/media/fc-intercept.mp4',
-  poster: 'assets/media/fc-intercept.webp',
-  caption: 'Task name · Policy name · 1× playback'
+  title: 'Grasp a moving object',
+  src: `${taskPath}/overview.mp4`,
+  poster: `${taskPath}/overview.webp`,
+  caption: 'FC-000 · State machine · Level 2',
+  views: [
+    { id: 'overview', label: 'Overview', src: `${taskPath}/overview.mp4`, poster: `${taskPath}/overview.webp` },
+    { id: 'front', label: 'Front', src: `${taskPath}/front.mp4`, poster: `${taskPath}/front.webp` },
+    { id: 'wrist', label: 'Wrist', src: `${taskPath}/wrist.mp4`, poster: `${taskPath}/wrist.webp` }
+  ]
 }
 ```
 
-修改相应占位条目即可；添加或删除 `videos` 数组中的对象会自动改变该排的长度和导航。视频建议使用 MP4 / H.264、16:9，并提供封面图。说明应准确标注任务、策略、播放倍率以及展示的分布条件。
+单视角视频只需 `title`、`src`，可附 `poster` 与 `caption`。添加或删除任务对象会自动改变长廊长度和导航。视频使用 MP4 / H.264，保留原始比例；说明应准确标明任务、生成方式或策略及分布条件。
 
 | ID | 视频类别 |
 | --- | --- |
@@ -77,13 +85,23 @@ base_url: '/MotionForge-Website/'
 | `speed` | Speed OOD |
 | `joint` | Joint OOD，四个因素同时变化 |
 
-OOD 视频可以使用预先制作的并排对照视频，方便在同一个画面内比较训练条件与对应 OOD 条件。占位标签 Clip 01 等仅表示待填位置，不代表已确认的实验案例。
+OOD 卡片说明标明任务编号和可见变化，完整设置保留在素材索引。Speed 卡片的 Level 3 表示源数据的运动配置，视频按正常速度播放。展示案例为选定的成功演示，评测结果仍以独立结果表为准。
 
-## 后续扩充结果
+## 实验结果与子任务表格
 
-当前 `results.js` 保留论文表 II / III 的 7 个策略、6 种条件、42 个总体成功率数值；`assets/results.csv` 为相同数据。`index.html` 中 `#results` 是独立结果区，后续可以在其中增加分场景、分任务、长短时程或消融结果图，不影响视频长廊。
+`results.js` 保留论文表 II / III 的 7 个策略、6 种条件、42 个总体成功率数值；`assets/results.csv` 为相同数据。下方子任务表格包含 40 个任务在 6 种条件下的全部 1680 个成功率，支持按条件、场景和长短任务筛选，并提供完整 CSV 下载。任务名称与视频保持一致，页面中的 EI 对应源 CSV 的 HRI。
 
-此时无需增加空白的结果标签。收到新数据后，再增加对应图表及准确的比较维度。更新现有数值时同步修改 `results.js` 与 CSV。
+数据来自 `../website_alignment_20260923/merged_id_ood_40tasks_website_aligned.csv`。网站导出 `assets/task-results.csv` 保留条件、任务、时程、七个模型成功率及单位，数值与输入逐项相同。
+
+总体口径为 40 个任务等权平均。每个条件包含四个场景各 10 个任务，或 23 个短任务与 17 个长任务；按任务数加权合并这些分组与直接求 40 任务均值相同。筛选后的表格底部只统计当前子集，不代表全部任务的总体值。
+
+运行以下命令验证并重新生成网页数据（仅使用 Python 标准库）：
+
+```sh
+python3 scripts/build_task_results.py
+```
+
+脚本核对数据完整性，并将 42 个任务均值同时与 `assets/results.csv` 和 `results.js` 中的总体值比较；全部通过后生成数据文件和 `assets/task-results-verification.csv` 核对记录。当前 42 项差值均为 0。网页直接加载本地 JS 数据，因此双击 `index.html` 和通过 HTTP 访问均可使用筛选表格。更新总体数值时同步修改 `results.js` 与总体 CSV。
 
 ## 文件
 
@@ -93,8 +111,13 @@ OOD 视频可以使用预先制作的并排对照视频，方便在同一个画�
 - `content.js`：视频与图片的集中配置。
 - `app.js`：长廊滑动与媒体播放交互。
 - `results.js`：现有结果图及数据。
+- `task-results.js`：子任务表格、筛选和当前任务均值。
+- `scripts/build_task_results.py`：子任务数据验证与网页数据生成。
 - `assets/paper.pdf`：匿名文稿副本，已清除 PDF 文档元数据。
 - `assets/results.csv`：当前结果表。
+- `assets/task-results.csv`：240 行子任务成功率下载。
+- `assets/task-results-data.js`：供页面直接加载的子任务数据。
+- `assets/task-results-verification.csv`：42 项总体均值核对记录。
 
 ## 匿名托管
 

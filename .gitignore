@@ -7,3 +7,7 @@ node_modules/
 .env
 .env.*
 !.env.example
+
+# Original simulation exports; website media is curated under assets/media/.
+/all_tasks_level2_state_machine_hd_separate_20260917/
+/all_tasks_ood_hd_separate_20260919/

@@ -13,6 +13,8 @@
   <script src="content.js" defer></script>
   <script src="app.js" defer></script>
   <script src="results.js" defer></script>
+  <script src="assets/task-results-data.js" defer></script>
+  <script src="task-results.js" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
@@ -56,13 +58,13 @@
     </section>
 
     <section id="scenes" class="gallery-section container" aria-labelledby="scenes-title">
-      <div class="section-heading"><h2 id="scenes-title">Scene demonstrations</h2><p>Ten tasks in each scene family. Browse the videos using the arrows or swipe horizontally.</p></div>
+      <div class="section-heading"><h2 id="scenes-title">In-distribution demonstrations</h2><p>40 Level 2 tasks across four scenes, demonstrated with a state machine. Browse tasks and switch between Overview, Front, and Wrist views.</p></div>
       <div id="scene-galleries"></div>
       <noscript><p>Enable JavaScript to browse the video galleries.</p><ul><li>Factory Conveyor (FC)</li><li>Circular Motion (CM)</li><li>Home Tabletop (HT)</li><li>Embodied Interaction (EI)</li></ul></noscript>
     </section>
 
     <section id="ood" class="gallery-section container" aria-labelledby="ood-title">
-      <div class="section-heading"><h2 id="ood-title">Out-of-distribution demonstrations</h2><p>Four single-factor shifts and one joint setting, with the task objective held fixed.</p></div>
+      <div class="section-heading"><h2 id="ood-title">Out-of-distribution demonstrations</h2><p>Selected state-machine demonstrations across four distribution shifts. Each row includes one example from each scene.</p></div>
       <div id="ood-galleries"></div>
       <noscript><ul><li>Object OOD</li><li>Background OOD</li><li>Lighting OOD</li><li>Speed OOD</li><li>Joint OOD</li></ul></noscript>
     </section>
@@ -75,6 +77,31 @@
           <div class="result-insight"><span aria-hidden="true">↗</span><p id="result-insight">ACT achieves the highest in-distribution success rate among the evaluated policies.</p></div><p id="result-context" class="small-note">Macro-average over all 40 tasks. Default R1 execution protocol.</p>
         </div>
         <details class="results-details"><summary>Full results table <span aria-hidden="true">＋</span></summary><div class="table-scroll" tabindex="0" role="region" aria-label="Full results table"><table><caption>Overall success rates (%) from Tables II and III.</caption><thead><tr><th scope="col">Policy</th><th scope="col">ID</th><th scope="col">Lighting</th><th scope="col">Object</th><th scope="col">Background</th><th scope="col">Speed</th><th scope="col">Joint</th></tr></thead><tbody id="results-table-body"></tbody></table></div></details>
+
+        <section id="task-results" class="task-results" aria-labelledby="task-results-title">
+          <div class="results-card-header">
+            <div><span class="eyebrow">PER-TASK SUCCESS RATES</span><h3 id="task-results-title">Results across all 40 tasks</h3></div>
+            <a href="assets/task-results.csv" download class="text-link">Download task CSV <span aria-hidden="true">↓</span></a>
+          </div>
+          <p class="task-results-description">Explore seven policies across six evaluation conditions. Filter by scene or task horizon to compare individual tasks.</p>
+          <div class="task-filters">
+            <label for="task-condition">Evaluation condition<select id="task-condition"><option value="id">In-distribution</option></select></label>
+            <label for="task-scene">Scene<select id="task-scene"><option value="all">All scenes</option><option value="fc">Factory Conveyor</option><option value="cm">Circular Motion</option><option value="ht">Home Tabletop</option><option value="ei">Embodied Interaction</option></select></label>
+            <label for="task-horizon">Task horizon<select id="task-horizon"><option value="all">All tasks</option><option value="short">Short</option><option value="long">Long</option></select></label>
+          </div>
+          <p id="task-results-count" class="small-note" role="status" aria-live="polite"></p>
+          <p id="task-table-hint" class="small-note task-table-hint">Scroll horizontally to compare all seven policies.</p>
+          <p id="task-results-fallback" class="small-note">Loading task results. You can also download the task CSV above.</p>
+          <div class="table-scroll task-table-scroll" tabindex="0" role="region" aria-label="Per-task success rates" aria-describedby="task-results-note task-table-hint">
+            <table class="task-results-table">
+              <caption id="task-results-caption">Success rates (%) by task. Higher is better.</caption>
+              <thead><tr id="task-results-head"><th scope="col">Task</th><th scope="col">Horizon</th></tr></thead>
+              <tbody id="task-results-body"></tbody>
+              <tfoot><tr id="task-results-average"></tr></tfoot>
+            </table>
+          </div>
+          <p id="task-results-note" class="small-note">Each task has equal weight. The mean over all 40 tasks matches the overall results above; filtered means use only the selected tasks. EI task IDs correspond to HRI in the CSV.</p>
+        </section>
 
     </section>
   </main>

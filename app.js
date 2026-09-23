@@ -30,17 +30,35 @@
 
   const videoObserver = 'IntersectionObserver' in window
     ? new IntersectionObserver(entries => entries.forEach(entry => {
+      entry.target.dataset.inViewport = String(entry.isIntersecting);
       if (!entry.isIntersecting) entry.target.pause();
     })) : null;
 
-  function createVideo(asset, label) {
+  const posterObserver = 'IntersectionObserver' in window
+    ? new IntersectionObserver(entries => entries.forEach(entry => {
+      if (!entry.isIntersecting) return;
+      const video = entry.target;
+      video.dataset.posterReady = 'true';
+      if (video.dataset.posterSrc) video.poster = video.dataset.posterSrc;
+      posterObserver.unobserve(video);
+    }), { rootMargin: '400px' }) : null;
+
+  function setPoster(video, poster) {
+    video.dataset.posterSrc = poster || '';
+    if (!poster) video.removeAttribute('poster');
+    else if (video.dataset.posterReady === 'true') video.poster = poster;
+  }
+
+  function createVideo(asset, label, lazyPoster = false) {
     const video = node('video', 'asset-media');
     video.controls = true;
     video.playsInline = true;
-    video.muted = true;
+    video.muted = asset.muted !== false;
     video.preload = 'none';
     video.setAttribute('aria-label', asset.alt || label);
-    if (asset.poster) video.poster = asset.poster;
+    video.dataset.posterReady = String(!lazyPoster || !posterObserver);
+    setPoster(video, asset.poster);
+    if (lazyPoster && posterObserver) posterObserver.observe(video);
     if (asset.captions) {
       const track = document.createElement('track');
       track.kind = 'captions';
@@ -90,28 +108,87 @@
     const placeholder = node('div', 'video-placeholder');
     placeholder.append(icon('play'), node('span', '', 'Video placeholder'));
     frame.append(placeholder, node('span', 'clip-number', String(index + 1).padStart(2, '0')));
-    if (asset.src) {
-      const video = createVideo(asset, title);
+    const views = Array.isArray(asset.views) ? asset.views.filter(view => view.src) : [];
+    const initialView = views.find(view => view.src === asset.src) || views[0];
+    const initialAsset = initialView ? { ...asset, ...initialView } : asset;
+    let cameraControls;
+    if (initialAsset.src) {
+      const video = createVideo(initialAsset, title, true);
+      video.id = `${card.id}-video`;
+      let pendingSwitch = null;
       frame.classList.add('has-media');
       video.addEventListener('error', () => {
+        pendingSwitch = null;
         video.pause();
         frame.classList.remove('has-media');
         video.hidden = true;
         placeholder.replaceChildren(icon('play'), node('span', '', 'Video unavailable'));
-      }, { once: true });
+      });
+      video.addEventListener('loadedmetadata', () => {
+        if (!pendingSwitch) return;
+        const { time, playing } = pendingSwitch;
+        pendingSwitch = null;
+        if (time > 0 && Number.isFinite(video.duration)) {
+          video.currentTime = Math.min(time, Math.max(0, video.duration - 0.05));
+        }
+        const anotherPlaying = [...videos].some(other => other !== video && !other.paused);
+        if (playing && !anotherPlaying && !document.hidden && video.dataset.inViewport !== 'false') {
+          video.play().catch(() => {});
+        }
+      });
       frame.append(video);
-      video.src = asset.src;
+      video.src = initialAsset.src;
+      if (views.length > 1) {
+        frame.classList.add('has-views');
+        cameraControls = node('div', 'camera-controls');
+        cameraControls.setAttribute('role', 'group');
+        cameraControls.setAttribute('aria-label', `Camera view for ${title}`);
+        let selectedView = initialView.id;
+        video.dataset.view = selectedView;
+        video.setAttribute('aria-label', `${title} — ${initialView.label} view`);
+        const buttons = views.map(view => {
+          const button = node('button', 'camera-button', view.label || view.id);
+          button.type = 'button';
+          button.dataset.camera = view.id;
+          button.setAttribute('aria-controls', video.id);
+          button.setAttribute('aria-pressed', String(view.id === selectedView));
+          button.addEventListener('click', () => {
+            if (view.id === selectedView && !video.error) return;
+            const state = pendingSwitch || { time: video.currentTime, playing: !video.paused && !video.ended };
+            video.pause();
+            selectedView = view.id;
+            buttons.forEach(other => other.setAttribute('aria-pressed', String(other.dataset.camera === selectedView)));
+            video.dataset.view = selectedView;
+            video.setAttribute('aria-label', `${title} — ${view.label || view.id} view`);
+            video.hidden = false;
+            frame.classList.add('has-media');
+            setPoster(video, view.poster);
+            video.src = view.src;
+            pendingSwitch = { time: state.time, playing: state.playing };
+            // Posters are enough until playback begins. Only fetch video data
+            // when restoring a playback position or continuing playback.
+            if (state.time > 0 || state.playing) {
+              video.preload = 'metadata';
+              video.load();
+            }
+          });
+          return button;
+        });
+        cameraControls.append(...buttons);
+      }
     }
     const caption = node('div', 'video-caption');
     caption.append(node('h4', '', title));
     if (asset.caption) caption.append(node('p', '', asset.caption));
-    card.append(frame, caption);
+    card.append(frame);
+    if (cameraControls) card.append(cameraControls);
+    card.append(caption);
     return card;
   }
 
   function createGallery(gallery) {
     const container = document.getElementById(gallery.group === 'scene' ? 'scene-galleries' : 'ood-galleries');
-    if (!container || !Array.isArray(gallery.videos) || !gallery.videos.length) return;
+    if (!container || !Array.isArray(gallery.videos)) return;
     const section = node('section', 'gallery-row');
     section.id = `gallery-${gallery.id}`;
     section.setAttribute('aria-labelledby', `gallery-title-${gallery.id}`);
@@ -121,6 +198,13 @@
     title.id = `gallery-title-${gallery.id}`;
     headingCopy.append(title);
     if (gallery.description) headingCopy.append(node('p', 'gallery-description', gallery.description));
+    heading.append(headingCopy);
+    if (!gallery.videos.length) {
+      section.classList.add('gallery-row-empty');
+      section.append(heading, node('p', 'gallery-empty-message', gallery.emptyMessage || 'Videos coming soon.'));
+      container.append(section);
+      return;
+    }
     const controls = node('div', 'gallery-controls');
     const previous = node('button', 'gallery-arrow gallery-previous');
     previous.type = 'button';
@@ -136,7 +220,6 @@
     count.setAttribute('aria-live', 'polite');
     count.setAttribute('aria-atomic', 'true');
     controls.append(previous, count, next);
-    heading.append(headingCopy);
     const track = node('div', 'gallery-track');
     track.id = `gallery-track-${gallery.id}`;
     track.tabIndex = 0;
