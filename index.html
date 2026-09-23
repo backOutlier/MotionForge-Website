@@ -22,6 +22,7 @@
     <div class="nav-shell">
       <a class="wordmark" href="#" aria-label="MotionForge home">MotionForge</a>
       <nav id="primary-nav" aria-label="Main navigation">
+        <a href="#comparison">Comparison</a>
         <a href="#scenes">Scene videos</a>
         <a href="#ood">OOD videos</a>
         <a href="#results">Results</a>
@@ -55,6 +56,34 @@
       </div>
 
       <p class="hero-caption">40 dynamic tasks · 4 scene families · 11 motion patterns · 17 long-horizon tasks</p>
+    </section>
+
+    <section id="comparison" class="comparison-section container" aria-labelledby="comparison-title">
+      <div class="section-heading">
+        <h2 id="comparison-title">Causal motion comparison</h2>
+        <p>Where does the target object's motion come from? Two bottle demonstrations illustrate the distinction in <a class="inline-source" href="assets/paper.pdf#page=3" target="_blank" rel="noopener">Table I and Fig. 2</a>.</p>
+      </div>
+      <div class="comparison-grid">
+        <figure class="comparison-card">
+          <div class="comparison-card-heading"><span class="eyebrow">DOMINO</span><h3>Prescribed target motion</h3></div>
+          <div class="comparison-frame media-slot" data-comparison-slot="domino"><p class="media-placeholder">DOMINO · Adjust Bottle</p></div>
+          <figcaption>
+            <p>The bottle follows a prescribed path before the robot grasps it.</p>
+            <p class="comparison-credit"><a class="inline-source" href="https://h-embodvis.github.io/DOMINO/" target="_blank" rel="noopener">DOMINO official demo</a> · Adjust Bottle · Level 1</p>
+            <p class="comparison-credit">Fang et al., ECCV 2026 · <a class="inline-source" href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener">CC BY-SA 4.0</a> · Original video</p>
+          </figcaption>
+        </figure>
+        <figure class="comparison-card">
+          <div class="comparison-card-heading"><span class="eyebrow">MOTIONFORGE</span><h3>Fall, contact, then roll</h3></div>
+          <div class="comparison-frame media-slot" data-comparison-slot="motionforge"><p class="media-placeholder">MotionForge · HT-001</p></div>
+          <figcaption>
+            <p>The bottle falls from a raised surface, contacts the table and rolls before being grasped.</p>
+            <p class="comparison-credit">HT-001 · State-machine demonstration · Level 2</p>
+          </figcaption>
+        </figure>
+      </div>
+      <p class="small-note">Both videos play at their original speed. Causal motion refers to task-relevant target motion with an identifiable, physically plausible cause inside the scene, under our paper's annotation criterion.</p>
+      <noscript><p class="small-note">View the videos: <a class="inline-source" href="assets/media/comparison/domino-adjust-bottle.mp4">DOMINO</a> · <a class="inline-source" href="assets/media/id/ht/ht_001_grasp_rolling_fallen_bottle/level2/overview.mp4">MotionForge</a>.</p></noscript>
     </section>
 
     <section id="scenes" class="gallery-section container" aria-labelledby="scenes-title">

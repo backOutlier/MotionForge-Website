@@ -16,6 +16,21 @@ window.MOTIONFORGE_MEDIA = {
   }
 };
 
+window.MOTIONFORGE_COMPARISON = {
+  domino: {
+    src: 'assets/media/comparison/domino-adjust-bottle.mp4',
+    poster: 'assets/media/comparison/domino-adjust-bottle.jpg',
+    alt: 'DOMINO official Adjust Bottle demonstration: prescribed target motion',
+    playbackGroup: 'causal-comparison'
+  },
+  motionforge: {
+    src: 'assets/media/id/ht/ht_001_grasp_rolling_fallen_bottle/level2/overview.mp4',
+    poster: 'assets/media/comparison/motionforge-falling-bottle.webp',
+    alt: 'MotionForge HT-001: a bottle falls, contacts the table, rolls and is grasped',
+    playbackGroup: 'causal-comparison'
+  }
+};
+
 window.MOTIONFORGE_GALLERIES = [
   {
     "id": "fc",

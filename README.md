@@ -3,6 +3,7 @@
 当前版本以视频展示为主，结构为：
 
 1. 论文标题与概览视频。
+   首页概览下方并排展示 DOMINO 官方瓶子示范与 MotionForge HT-001，说明论文 Table I / Fig. 2 中的因果运动定义。
 2. **四排 ID 场景视频**：Factory Conveyor、Circular Motion、Home Tabletop、Embodied Interaction，各 10 个任务。
 3. **OOD 精选视频**：Object、Background、Lighting、Speed 各 4 个案例；Joint 保留待补充说明。
 4. 实验结果图与完整数据表。
@@ -54,6 +55,8 @@ OOD 来自 2026-09-19 批次，仅将精选的 16 组复制到 [`assets/media/oo
 封面取自视频真实画面，视频点击后加载并带声音播放，支持暂停、进度拖动及全屏。桌面和手机均按视频原始比例完整显示。更换视频时同步更新路径和封面。
 
 ### 九排视频长廊
+
+首页因果运动对比使用 `MOTIONFORGE_COMPARISON` 配置，DOMINO 原片下载到 `assets/media/comparison/`，MotionForge 复用已接入的 HT-001 Overview。两条视频均原速、完整播放，可以同时播放；来源和许可见 [对比素材说明](assets/media/comparison/README.md)。
 
 `MOTIONFORGE_GALLERIES` 中每个对象对应一排，`videos` 中每个对象对应一张任务卡。`src` / `poster` 设置默认视角；`views` 可选，用于提供多个镜头。例如（`taskPath` 为任务的 `level2` 目录）：
 

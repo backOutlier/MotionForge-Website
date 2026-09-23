@@ -55,6 +55,7 @@
     video.playsInline = true;
     video.muted = asset.muted !== false;
     video.preload = 'none';
+    if (asset.playbackGroup) video.dataset.playbackGroup = asset.playbackGroup;
     video.setAttribute('aria-label', asset.alt || label);
     video.dataset.posterReady = String(!lazyPoster || !posterObserver);
     setPoster(video, asset.poster);
@@ -71,7 +72,8 @@
     videos.add(video);
     video.addEventListener('play', () => {
       videos.forEach(other => {
-        if (other !== video) other.pause();
+        const sameGroup = video.dataset.playbackGroup && other.dataset.playbackGroup === video.dataset.playbackGroup;
+        if (other !== video && !sameGroup) other.pause();
       });
       if (document.hidden) video.pause();
     });
@@ -98,6 +100,20 @@
     overview.classList.add('has-media');
     element.src = overviewAsset.src;
   }
+
+  document.querySelectorAll('[data-comparison-slot]').forEach(slot => {
+    const asset = (window.MOTIONFORGE_COMPARISON || {})[slot.dataset.comparisonSlot];
+    if (!asset || !asset.src) return;
+    const video = createVideo(asset, 'Causal motion comparison', true);
+    video.addEventListener('error', () => {
+      slot.classList.remove('has-media');
+      video.remove();
+      slot.append(node('p', 'comparison-error', 'This video could not be loaded.'));
+    }, { once: true });
+    slot.append(video);
+    slot.classList.add('has-media');
+    video.src = asset.src;
+  });
 
   function createCard(asset, gallery, index) {
     const title = asset.title || `${gallery.title} · Clip ${String(index + 1).padStart(2, '0')}`;

@@ -1,0 +1,26 @@
+{
+  "title": "Adjust Bottle — Aloha-AgileX, Level 1, Clean, episode 0",
+  "creators": [
+    "Heng Fang",
+    "Shangru Li",
+    "Shuhan Wang",
+    "Xuanyang Xi",
+    "Dingkang Liang",
+    "Xiang Bai"
+  ],
+  "project": "https://h-embodvis.github.io/DOMINO/",
+  "original_video": "https://h-embodvis.github.io/DOMINO/static/videos/aloha_clean_level1_adjust_bottle/episode0.mp4",
+  "paper": "https://arxiv.org/html/2603.15620v1#S2.SS2",
+  "download_date": "2026-09-23",
+  "downloaded_bytes": 111548,
+  "sha256": "d97257407370deee618003961d7219966d66ea7f1ab21f16c82981d8a665d11c",
+  "width": 320,
+  "height": 240,
+  "fps": 30,
+  "frames": 145,
+  "duration_seconds": 4.833333333333333,
+  "changes": "None. Original MP4 bytes retained. Poster extracted from first frame.",
+  "license_notice": "Official project page footer states Creative Commons Attribution-ShareAlike 4.0 International.",
+  "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+  "code_commit": "9c94f2d3a700fff3b65f041df4038d497139ed1f"
+}
