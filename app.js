@@ -34,22 +34,12 @@
       if (!entry.isIntersecting) entry.target.pause();
     })) : null;
 
-  const posterObserver = 'IntersectionObserver' in window
-    ? new IntersectionObserver(entries => entries.forEach(entry => {
-      if (!entry.isIntersecting) return;
-      const video = entry.target;
-      video.dataset.posterReady = 'true';
-      if (video.dataset.posterSrc) video.poster = video.dataset.posterSrc;
-      posterObserver.unobserve(video);
-    }), { rootMargin: '400px' }) : null;
-
   function setPoster(video, poster) {
-    video.dataset.posterSrc = poster || '';
     if (!poster) video.removeAttribute('poster');
-    else if (video.dataset.posterReady === 'true') video.poster = poster;
+    else video.poster = poster;
   }
 
-  function createVideo(asset, label, lazyPoster = false) {
+  function createVideo(asset, label) {
     const video = node('video', 'asset-media');
     video.controls = true;
     video.playsInline = true;
@@ -57,9 +47,9 @@
     video.preload = 'none';
     if (asset.playbackGroup) video.dataset.playbackGroup = asset.playbackGroup;
     video.setAttribute('aria-label', asset.alt || label);
-    video.dataset.posterReady = String(!lazyPoster || !posterObserver);
+    // Bind the existing still immediately, even with video preload disabled.
+    // Gallery panels themselves are created only when their tab is opened.
     setPoster(video, asset.poster);
-    if (lazyPoster && posterObserver) posterObserver.observe(video);
     if (asset.captions) {
       const track = document.createElement('track');
       track.kind = 'captions';
@@ -71,11 +61,14 @@
     }
     videos.add(video);
     video.addEventListener('play', () => {
+      if (document.hidden || video.closest('[hidden]')) {
+        video.pause();
+        return;
+      }
       videos.forEach(other => {
         const sameGroup = video.dataset.playbackGroup && other.dataset.playbackGroup === video.dataset.playbackGroup;
         if (other !== video && !sameGroup) other.pause();
       });
-      if (document.hidden) video.pause();
     });
     if (videoObserver) videoObserver.observe(video);
     return video;
@@ -104,7 +97,7 @@
   document.querySelectorAll('[data-comparison-slot]').forEach(slot => {
     const asset = (window.MOTIONFORGE_COMPARISON || {})[slot.dataset.comparisonSlot];
     if (!asset || !asset.src) return;
-    const video = createVideo(asset, 'Causal motion comparison', true);
+    const video = createVideo(asset, 'Causal motion comparison');
     video.addEventListener('error', () => {
       slot.classList.remove('has-media');
       video.remove();
@@ -129,7 +122,7 @@
     const initialAsset = initialView ? { ...asset, ...initialView } : asset;
     let cameraControls;
     if (initialAsset.src) {
-      const video = createVideo(initialAsset, title, true);
+      const video = createVideo(initialAsset, title);
       video.id = `${card.id}-video`;
       let pendingSwitch = null;
       frame.classList.add('has-media');
@@ -148,7 +141,7 @@
           video.currentTime = Math.min(time, Math.max(0, video.duration - 0.05));
         }
         const anotherPlaying = [...videos].some(other => other !== video && !other.paused);
-        if (playing && !anotherPlaying && !document.hidden && video.dataset.inViewport !== 'false') {
+        if (playing && !anotherPlaying && !document.hidden && !video.closest('[hidden]') && video.dataset.inViewport !== 'false') {
           video.play().catch(() => {});
         }
       });
@@ -202,8 +195,7 @@
     return card;
   }
 
-  function createGallery(gallery) {
-    const container = document.getElementById(gallery.group === 'scene' ? 'scene-galleries' : 'ood-galleries');
+  function createGallery(gallery, container) {
     if (!container || !Array.isArray(gallery.videos)) return;
     const section = node('section', 'gallery-row');
     section.id = `gallery-${gallery.id}`;
@@ -281,11 +273,15 @@
         const video = card.querySelector('video');
         if (!video || video.paused) return;
         const rect = card.getBoundingClientRect();
-        if (rect.right <= bounds.left || rect.left >= bounds.right) video.pause();
+        if (section.closest('[hidden]') || rect.right <= bounds.left || rect.left >= bounds.right) video.pause();
       });
     }
 
     function sync() {
+      if (section.closest('[hidden]') || !track.clientWidth) {
+        pauseOutsideTrack();
+        return;
+      }
       const visible = visibleIndices();
       if (visible.length) {
         const first = visible[0] + 1;
@@ -351,6 +347,7 @@
     track.addEventListener('scrollend', settle);
 
     function resize() {
+      if (section.closest('[hidden]') || !track.clientWidth) return;
       const anchor = pages[currentPage] ? pages[currentPage].index : 0;
       const nextPages = [];
       cards.forEach((card, index) => {
@@ -369,10 +366,117 @@
       window.addEventListener('resize', resize);
     }
     resize();
-    galleries.push({ stopMotion: () => selectPosition(pages[currentPage].left, true), pauseOutsideTrack });
+    const controller = {
+      refresh: resize,
+      stopMotion: () => selectPosition(pages[currentPage] ? pages[currentPage].left : 0, true),
+      pauseOutsideTrack,
+    };
+    galleries.push(controller);
+    return controller;
   }
 
-  (window.MOTIONFORGE_GALLERIES || []).forEach(createGallery);
+  function createExplorer(group, containerId, defaultId, label) {
+    const container = document.getElementById(containerId);
+    const items = (window.MOTIONFORGE_GALLERIES || []).filter(gallery => gallery.group === group);
+    if (!container || !items.length) return;
+    container.classList.add('gallery-explorer');
+    const tablist = node('div', 'explorer-tabs');
+    tablist.setAttribute('role', 'tablist');
+    tablist.setAttribute('aria-label', label);
+    container.append(tablist);
+
+    const panels = items.map(gallery => {
+      const panel = node('div', 'explorer-panel');
+      panel.id = `explorer-panel-${gallery.id}`;
+      panel.hidden = true;
+      panel.tabIndex = 0;
+      panel.setAttribute('role', 'tabpanel');
+      panel.setAttribute('aria-labelledby', `explorer-tab-${gallery.id}`);
+      container.append(panel);
+      return panel;
+    });
+    const controllers = new Map();
+    const tabs = items.map((gallery, index) => {
+      const button = node('button', 'explorer-tab', group === 'ood' ? gallery.title.replace(/\sOOD$/, '') : gallery.title);
+      button.id = `explorer-tab-${gallery.id}`;
+      button.type = 'button';
+      button.tabIndex = -1;
+      button.setAttribute('role', 'tab');
+      button.setAttribute('aria-selected', 'false');
+      button.setAttribute('aria-controls', panels[index].id);
+      button.addEventListener('click', () => select(index));
+      button.addEventListener('keydown', event => {
+        let next;
+        if (event.key === 'ArrowLeft') next = (index + items.length - 1) % items.length;
+        else if (event.key === 'ArrowRight') next = (index + 1) % items.length;
+        else if (event.key === 'Home') next = 0;
+        else if (event.key === 'End') next = items.length - 1;
+        else return;
+        event.preventDefault();
+        select(next);
+        tabs[next].focus();
+        tabs[next].scrollIntoView({ block: 'nearest', inline: 'nearest' });
+      });
+      tablist.append(button);
+      return button;
+    });
+
+    function select(index) {
+      tabs.forEach((tab, tabIndex) => {
+        const selected = tabIndex === index;
+        tab.setAttribute('aria-selected', String(selected));
+        tab.tabIndex = selected ? 0 : -1;
+        panels[tabIndex].hidden = !selected;
+        if (!selected) panels[tabIndex].querySelectorAll('video').forEach(video => video.pause());
+      });
+      const gallery = items[index];
+      const panel = panels[index];
+      if (!controllers.has(gallery.id)) {
+        if (gallery.videos.length) {
+          controllers.set(gallery.id, createGallery(gallery, panel));
+        } else {
+          const note = node('div', 'explorer-note');
+          note.id = `gallery-${gallery.id}`;
+          note.append(node('h3', '', gallery.title), node('p', '', gallery.id === 'joint'
+            ? 'Lighting, objects, backgrounds, and motion speed change together in the joint evaluation.'
+            : gallery.description || 'This evaluation is included in the results above.'));
+          panel.append(note);
+          controllers.set(gallery.id, null);
+        }
+      }
+      const controller = controllers.get(gallery.id);
+      if (controller) controller.refresh();
+      const tabBounds = tabs[index].getBoundingClientRect();
+      const listBounds = tablist.getBoundingClientRect();
+      if (tabBounds.left < listBounds.left) tablist.scrollLeft += tabBounds.left - listBounds.left;
+      else if (tabBounds.right > listBounds.right) tablist.scrollLeft += tabBounds.right - listBounds.right;
+    }
+
+    function revealHash() {
+      const targetId = window.location.hash.slice(1);
+      const index = items.findIndex(gallery => targetId === `gallery-${gallery.id}` || targetId.startsWith(`gallery-${gallery.id}-clip-`));
+      if (index < 0) return;
+      select(index);
+      requestAnimationFrame(() => {
+        const target = document.getElementById(targetId);
+        if (target) target.scrollIntoView({ block: 'start', inline: 'start', behavior: 'instant' });
+      });
+    }
+
+    const defaultIndex = items.findIndex(gallery => gallery.id === defaultId);
+    select(defaultIndex >= 0 ? defaultIndex : 0);
+    window.addEventListener('hashchange', revealHash);
+    document.addEventListener('click', event => {
+      if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+      const link = event.target.closest('a[href^="#gallery-"]');
+      // Clicking the same fragment again does not fire hashchange.
+      if (link && link.getAttribute('href') === window.location.hash) revealHash();
+    });
+    revealHash();
+  }
+
+  createExplorer('scene', 'scene-galleries', 'fc', 'In-distribution scene');
+  createExplorer('ood', 'ood-galleries', 'object', 'Out-of-distribution condition');
 
   const menuButton = document.querySelector('.menu-toggle');
   const nav = document.getElementById('primary-nav');

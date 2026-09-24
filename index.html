@@ -3,16 +3,20 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="MotionForge supplementary material: videos across four scene families, five out-of-distribution settings, and evaluation results.">
+  <meta name="description" content="MotionForge: dynamic manipulation, long-horizon tasks, domain shifts, and real-time evaluation. Explore the benchmark, data generation pipeline, videos, and results.">
   <meta name="theme-color" content="#ffffff">
   <meta name="referrer" content="no-referrer">
   <title>MotionForge — Supplementary Material</title>
   <script src="site-config.js"></script>
   <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="story.css">
+  <link rel="stylesheet" href="protocol.css">
+  <link rel="stylesheet" href="explorer.css">
   <script src="content.js" defer></script>
   <script src="app.js" defer></script>
   <script src="results.js" defer></script>
+  <script src="protocol.js" defer></script>
   <script src="assets/task-results-data.js" defer></script>
   <script src="task-results.js" defer></script>
 </head>
@@ -22,22 +26,24 @@
     <div class="nav-shell">
       <a class="wordmark" href="#" aria-label="MotionForge home">MotionForge</a>
       <nav id="primary-nav" aria-label="Main navigation">
-        <a href="#comparison">Comparison</a>
-        <a href="#scenes">Scene videos</a>
-        <a href="#ood">OOD videos</a>
+        <a href="#benchmark">Benchmark</a>
+        <a href="#pipeline">Pipeline</a>
+        <a href="#evaluation">Evaluation</a>
         <a href="#results">Results</a>
+        <a href="#explore">Explore</a>
         <a href="assets/paper.pdf" target="_blank" rel="noopener">Paper ↗</a>
       </nav>
       <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="primary-nav">Menu <span aria-hidden="true">＋</span></button>
     </div>
   </header>
   <main id="main">
-    <section class="hero container" aria-labelledby="hero-title">
+    <section id="overview" class="hero container" aria-labelledby="hero-title">
       <p class="hero-eyebrow">ICRA 2027 · Supplementary Material</p>
       <h1 id="hero-title">MotionForge</h1>
       <p class="paper-title">A Data Generation Pipeline and Large-Scale Benchmark<br class="desktop-break"> for Long-Horizon Manipulation of Dynamic Objects<br class="desktop-break"> with Domain Shifts</p>
       <p class="authors">Anonymous Authors</p>
-      <div class="hero-actions"><a class="button" href="assets/paper.pdf" target="_blank" rel="noopener">Read paper <span aria-hidden="true">↗</span></a><a class="button" href="#scenes">View demonstrations <span aria-hidden="true">↓</span></a></div>
+      <p class="hero-introduction">Dynamic manipulation requires a robot to act while the world keeps changing. MotionForge combines physically grounded target motion and extended interactions with controlled domain shifts and real-time evaluation, exposing the challenges of both generalization and timely action.</p>
+      <div class="hero-actions"><a class="button" href="assets/paper.pdf" target="_blank" rel="noopener">Read paper <span aria-hidden="true">↗</span></a><a class="button" href="#explore">Explore the benchmark <span aria-hidden="true">↓</span></a></div>
       <div class="hero-stage media-slot" data-media-slot="overview">
         <div class="media-placeholder hero-placeholder">
           <div class="stage-top"><span><i class="status-dot"></i> MOTIONFORGE</span><span>SUPPLEMENTARY VIDEO</span></div>
@@ -55,17 +61,35 @@
         </div>
       </div>
 
-      <p class="hero-caption">40 dynamic tasks · 4 scene families · 11 motion patterns · 17 long-horizon tasks</p>
+      <div class="benchmark-stats" aria-label="Benchmark at a glance">
+        <div><strong>40</strong><span>dynamic tasks</span></div>
+        <div><strong>4</strong><span>scene families</span></div>
+        <div><strong>11</strong><span>motion patterns</span></div>
+        <div><strong>17</strong><span>long-horizon tasks</span></div>
+      </div>
+      <div class="contribution-grid">
+        <a href="#pipeline"><span class="contribution-number">01</span><h2>Construct &amp; validate</h2><p>A reusable task pipeline turns dynamic interactions into validated demonstrations.</p><span class="contribution-link">Data generation ↗</span></a>
+        <a href="#domain-shifts"><span class="contribution-number">02</span><h2>Shift &amp; combine</h2><p>Vary object, background, lighting, and speed individually or together.</p><span class="contribution-link">Domain generalization ↗</span></a>
+        <a href="#evaluation"><span class="contribution-number">03</span><h2>Keep the world moving</h2><p>A shared environment clock preserves the effect of policy inference latency.</p><span class="contribution-link">Real-time evaluation ↗</span></a>
+      </div>
     </section>
 
-    <section id="comparison" class="comparison-section container" aria-labelledby="comparison-title">
+    <section id="benchmark" class="story-section container" aria-labelledby="benchmark-title">
+      <div class="section-heading"><span class="chapter-label">01 / THE BENCHMARK</span><h2 id="benchmark-title">Manipulation in a changing world</h2><p>From conveyor tracking to contact-induced motion, each scene family contributes ten tasks. The benchmark spans sustained motion, acceleration, abrupt contact transitions, and more complex temporal dynamics.</p></div>
+      <div class="scene-overview">
+        <a href="#gallery-fc"><span>FC · 10 TASKS</span><h3>Factory Conveyor</h3><p>Track translating targets and coordinate placement into moving receptacles.</p><span class="scene-link">Browse scene ↗</span></a>
+        <a href="#gallery-cm"><span>CM · 10 TASKS</span><h3>Circular Motion</h3><p>Time interactions with rotating and orbiting objects.</p><span class="scene-link">Browse scene ↗</span></a>
+        <a href="#gallery-ht"><span>HT · 10 TASKS</span><h3>Home Tabletop</h3><p>Respond to falling, rolling, and contact-driven state changes.</p><span class="scene-link">Browse scene ↗</span></a>
+        <a href="#gallery-ei"><span>EI · 10 TASKS</span><h3>Embodied Interaction</h3><p>Coordinate catching, handover, and alignment with moving partners.</p><span class="scene-link">Browse scene ↗</span></a>
+      </div>
+    <section id="comparison" class="comparison-section" aria-labelledby="comparison-title">
       <div class="section-heading">
-        <h2 id="comparison-title">Causal motion comparison</h2>
-        <p>Where does the target object's motion come from? Two bottle demonstrations illustrate the distinction in <a class="inline-source" href="assets/paper.pdf#page=3" target="_blank" rel="noopener">Table I and Fig. 2</a>.</p>
+        <h3 id="comparison-title">What causes the target to move?</h3>
+        <p>A physically plausible scene-internal cause connects target motion to the interaction. These bottle demonstrations illustrate the criterion in <a class="inline-source" href="assets/paper.pdf#page=3" target="_blank" rel="noopener">Table I and Fig. 2</a>.</p>
       </div>
       <div class="comparison-grid">
         <figure class="comparison-card">
-          <div class="comparison-card-heading"><span class="eyebrow">DOMINO</span><h3>Prescribed target motion</h3></div>
+          <div class="comparison-card-heading"><span class="eyebrow">DOMINO</span><h4>Prescribed target motion</h4></div>
           <div class="comparison-frame media-slot" data-comparison-slot="domino"><p class="media-placeholder">DOMINO · Adjust Bottle</p></div>
           <figcaption>
             <p>The bottle follows a prescribed path before the robot grasps it.</p>
@@ -74,7 +98,7 @@
           </figcaption>
         </figure>
         <figure class="comparison-card">
-          <div class="comparison-card-heading"><span class="eyebrow">MOTIONFORGE</span><h3>Fall, contact, then roll</h3></div>
+          <div class="comparison-card-heading"><span class="eyebrow">MOTIONFORGE</span><h4>Fall, contact, then roll</h4></div>
           <div class="comparison-frame media-slot" data-comparison-slot="motionforge"><p class="media-placeholder">MotionForge · HT-001</p></div>
           <figcaption>
             <p>The bottle falls from a raised surface, contacts the table and rolls before being grasped.</p>
@@ -86,20 +110,43 @@
       <noscript><p class="small-note">View the videos: <a class="inline-source" href="assets/media/comparison/domino-adjust-bottle.mp4">DOMINO</a> · <a class="inline-source" href="assets/media/id/ht/ht_001_grasp_rolling_fallen_bottle/level2/overview.mp4">MotionForge</a>.</p></noscript>
     </section>
 
-    <section id="scenes" class="gallery-section container" aria-labelledby="scenes-title">
-      <div class="section-heading"><h2 id="scenes-title">In-distribution demonstrations</h2><p>40 Level 2 tasks across four scenes, demonstrated with a state machine. Browse tasks and switch between Overview, Front, and Wrist views.</p></div>
-      <div id="scene-galleries"></div>
-      <noscript><p>Enable JavaScript to browse the video galleries.</p><ul><li>Factory Conveyor (FC)</li><li>Circular Motion (CM)</li><li>Home Tabletop (HT)</li><li>Embodied Interaction (EI)</li></ul></noscript>
+      <div class="horizon-callout">
+        <div><span class="eyebrow">EXTENDED INTERACTION</span><h3>Follow the task beyond a single grasp</h3><p>A task is long-horizon if its reference execution exceeds 8 seconds with at least two ordered manipulation skills, or exceeds 20 seconds with any skill count. Seventeen tasks meet this criterion.</p></div>
+        <a class="horizon-example" href="#gallery-cm-clip-9"><img src="assets/media/id/cm/cm_008_long_horizon_pick_rotating_objects_to_rotating_container/level2/overview.webp" width="160" height="120" loading="lazy" alt="Moving objects and a rotating basket in the CM-008 demonstration"><div><span class="eyebrow">EXAMPLE · CM-008</span><strong>Move rotating objects to a rotating container</strong><span class="skill-sequence">Track &amp; pick <i aria-hidden="true">→</i> Align &amp; place <i aria-hidden="true">→</i> Repeat</span><span class="text-link">Watch the task ↗</span></div></a>
+      </div>
     </section>
 
-    <section id="ood" class="gallery-section container" aria-labelledby="ood-title">
-      <div class="section-heading"><h2 id="ood-title">Out-of-distribution demonstrations</h2><p>Selected state-machine demonstrations across four distribution shifts. Each row includes one example from each scene.</p></div>
-      <div id="ood-galleries"></div>
-      <noscript><ul><li>Object OOD</li><li>Background OOD</li><li>Lighting OOD</li><li>Speed OOD</li><li>Joint OOD</li></ul></noscript>
+    <section id="pipeline" class="story-section container" aria-labelledby="pipeline-title">
+      <div class="section-heading"><span class="chapter-label">02 / DATA GENERATION</span><h2 id="pipeline-title">From task design to demonstrations</h2><p>A two-stage pipeline constructs tasks in Isaac Sim, then validates them and generates trajectories. Reusable assets and manipulation skills support construction; execution feedback guides revisions before data collection.</p></div>
+      <ol class="pipeline-flow" aria-label="Task construction and data generation">
+        <li><span class="pipeline-step">01</span><h3>Describe</h3><p>A human specifies the scene, target object, and task objective.</p><span class="pipeline-output">Design prompt</span></li>
+        <li><span class="pipeline-step">02</span><h3>Construct</h3><p>A coding agent assembles the scene and composes reusable tracking and manipulation skills.</p><span class="pipeline-output">Candidate task</span></li>
+        <li><span class="pipeline-step">03</span><h3>Validate &amp; revise</h3><p>An examine agent uses rollouts, videos, and logs to check execution across objects and speeds.</p><span class="pipeline-output">Validated configuration</span></li>
+        <li><span class="pipeline-step">04</span><h3>Collect</h3><p>Run the fixed task with randomized initial states and retain successful trajectories.</p><span class="pipeline-output">Demonstration dataset</span></li>
+      </ol>
+      <div class="pipeline-feedback"><span aria-hidden="true">↶</span><p>Failed validation returns feedback to task construction for revision.</p><a href="assets/paper.pdf#page=5" target="_blank" rel="noopener" class="text-link">Pipeline details ↗</a></div>
+      <div class="collection-note"><strong>~20K</strong><div><h3>Generated demonstration episodes</h3><p>Policy training uses 50 demonstrations per task (2K total). The oracle uses simulator state for collection; evaluated policies receive visual observations.</p></div></div>
     </section>
 
-    <section id="results" class="results-section container" aria-labelledby="results-title">
-      <div class="section-heading"><h2 id="results-title">Evaluation results</h2><p>Overall success rates across 40 tasks under the real-time R1 protocol. Tables II and III in the paper.</p></div>
+    <section id="evaluation" class="story-section container" aria-labelledby="evaluation-title">
+      <div class="section-heading"><span class="chapter-label">03 / EVALUATION DESIGN</span><h2 id="evaluation-title">Does the world wait for the policy?</h2><p>In a dynamic scene, inference takes time while the target keeps moving. MotionForge evaluates every policy under the same R1 environment clock and scheduling rules, preserving each policy’s native inference latency. An action is applied on arrival, to a scene that may have changed since observation.</p></div>
+      <div id="protocol-demo"><noscript><p>R1 advances the environment independently at 120 Hz during inference. R2 also advances asynchronously, with coarser stepping. R3 freezes the environment during inference and resumes when the action returns. See Fig. 3 in the paper.</p></noscript></div>
+      <section id="domain-shifts" class="domain-shifts" aria-labelledby="domain-shifts-title">
+        <div class="domain-copy"><span class="eyebrow">SAME TASK · CHANGING CONDITIONS</span><h3 id="domain-shifts-title">One factor at a time. Then all four.</h3><p>Task semantics and the interaction goal stay fixed. Single-factor OOD changes only the object, background, lighting, or motion speed. Joint OOD shifts all four together to evaluate compositional generalization.</p><p class="domain-legend"><span class="shift-marker" aria-hidden="true"></span> Shifted factor <span class="base-marker" aria-hidden="true"></span> In-domain factor</p><a class="text-link" href="#ood">Explore OOD demonstrations ↗</a></div>
+        <div class="shift-matrix-wrap"><table class="shift-matrix"><caption>Factors changed in each evaluation condition</caption><thead><tr><th scope="col">Condition</th><th scope="col">Object</th><th scope="col">Background</th><th scope="col">Lighting</th><th scope="col">Speed</th></tr></thead><tbody>
+          <tr><th scope="row">ID</th><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+          <tr><th scope="row">Object</th><td class="is-shifted">Shift</td><td>—</td><td>—</td><td>—</td></tr>
+          <tr><th scope="row">Background</th><td>—</td><td class="is-shifted">Shift</td><td>—</td><td>—</td></tr>
+          <tr><th scope="row">Lighting</th><td>—</td><td>—</td><td class="is-shifted">Shift</td><td>—</td></tr>
+          <tr><th scope="row">Speed</th><td>—</td><td>—</td><td>—</td><td class="is-shifted">Shift</td></tr>
+          <tr class="joint-shift"><th scope="row">Joint</th><td class="is-shifted">Shift</td><td class="is-shifted">Shift</td><td class="is-shifted">Shift</td><td class="is-shifted">Shift</td></tr>
+        </tbody></table></div>
+      </section>
+    </section>
+
+    <section id="results" class="results-section story-section container" aria-labelledby="results-title">
+      <div class="section-heading"><span class="chapter-label">04 / EXPERIMENTAL FINDINGS</span><h2 id="results-title">Dynamic manipulation remains challenging</h2><p>Seven policies are evaluated with 50 trials per task under R1. Overall success is the equal-weight mean across all 40 tasks. Tables II and III report in-distribution and domain-shift results.</p></div>
+      <div class="finding-grid"><div><strong>22.20<span>%</span></strong><h3>Highest ID success</h3><p>ACT leads the in-distribution evaluation across 40 tasks.</p></div><div><strong>5.85<span>%</span></strong><h3>Highest Joint OOD success</h3><p>X-VLA leads when all four factors shift; every policy falls below its ID result.</p></div><div><strong>7 <span>policies</span></strong><h3>A shared evaluation setup</h3><p>Identical task conditions and R1 scheduling preserve the effect of inference latency.</p></div></div>
         <div class="results-card"><div class="results-card-header"><div><span class="eyebrow">OVERALL SUCCESS RATE</span><h3 id="result-title">In-distribution success</h3></div><a href="assets/results.csv" download class="text-link">Download CSV <span aria-hidden="true">↓</span></a></div>
           <div class="result-tabs" role="tablist" aria-label="Evaluation condition"><button type="button" role="tab" aria-controls="results-chart" aria-selected="true" data-result-mode="id">In-distribution</button><button type="button" role="tab" aria-controls="results-chart" aria-selected="false" tabindex="-1" data-result-mode="object">Object</button><button type="button" role="tab" aria-controls="results-chart" aria-selected="false" tabindex="-1" data-result-mode="background">Background</button><button type="button" role="tab" aria-controls="results-chart" aria-selected="false" tabindex="-1" data-result-mode="lighting">Lighting</button><button type="button" role="tab" aria-controls="results-chart" aria-selected="false" tabindex="-1" data-result-mode="speed">Speed</button><button type="button" role="tab" aria-controls="results-chart" aria-selected="false" tabindex="-1" data-result-mode="joint">Joint OOD</button></div>
           <div class="chart-heading"><span>POLICY</span><span>SUCCESS RATE (%) · HIGHER IS BETTER</span></div><div id="results-chart" role="tabpanel" tabindex="0" aria-label="Policy success rates"><noscript>Enable JavaScript for interactive results, or download the CSV above.</noscript></div><div class="chart-axis" aria-hidden="true"><span>0</span><span>5</span><span>10</span><span>15</span><span>20</span><span>25%</span></div>
@@ -107,7 +154,23 @@
         </div>
         <details class="results-details"><summary>Full results table <span aria-hidden="true">＋</span></summary><div class="table-scroll" tabindex="0" role="region" aria-label="Full results table"><table><caption>Overall success rates (%) from Tables II and III.</caption><thead><tr><th scope="col">Policy</th><th scope="col">ID</th><th scope="col">Lighting</th><th scope="col">Object</th><th scope="col">Background</th><th scope="col">Speed</th><th scope="col">Joint</th></tr></thead><tbody id="results-table-body"></tbody></table></div></details>
 
-        <section id="task-results" class="task-results" aria-labelledby="task-results-title">
+        <div id="protocol-results"><noscript><p>Execution-protocol comparison on FC and CM (20 tasks): ACT R1/R2/R3 = 26.2/33.8/49.9%; X-VLA = 13.6/15.9/41.1%; GR00T N1.7 = 12.7/11.6/34.4%. See Fig. 6(c) in the paper.</p></noscript></div>
+    </section>
+    <section id="explore" class="explore-section" aria-labelledby="explore-title">
+      <div class="section-heading container"><span class="chapter-label">05 / EXPLORE THE BENCHMARK</span><h2 id="explore-title">Look closer at every task</h2><p>Browse full demonstrations and inspect individual success rates. Videos show state-machine demonstrations; policy performance is reported in the results tables.</p></div>
+    <section id="scenes" class="gallery-section container" aria-labelledby="scenes-title">
+      <div class="section-heading"><h3 id="scenes-title">In-distribution demonstrations</h3><p>Choose a scene to browse its ten Level 2 tasks. Switch between Overview, Front, and Wrist camera views.</p></div>
+      <div id="scene-galleries"></div>
+      <noscript><p>Enable JavaScript to browse the video galleries.</p><ul><li>Factory Conveyor (FC)</li><li>Circular Motion (CM)</li><li>Home Tabletop (HT)</li><li>Embodied Interaction (EI)</li></ul></noscript>
+    </section>
+
+    <section id="ood" class="gallery-section container" aria-labelledby="ood-title">
+      <div class="section-heading"><h3 id="ood-title">Out-of-distribution demonstrations</h3><p>Choose a shifted factor to see one selected demonstration from each scene. Task captions describe the changed condition.</p></div>
+      <div id="ood-galleries"></div>
+      <noscript><ul><li>Object OOD</li><li>Background OOD</li><li>Lighting OOD</li><li>Speed OOD</li><li>Joint OOD</li></ul></noscript>
+    </section>
+
+        <section id="task-results" class="task-results container" aria-labelledby="task-results-title">
           <div class="results-card-header">
             <div><span class="eyebrow">PER-TASK SUCCESS RATES</span><h3 id="task-results-title">Results across all 40 tasks</h3></div>
             <a href="assets/task-results.csv" download class="text-link">Download task CSV <span aria-hidden="true">↓</span></a>
@@ -131,7 +194,6 @@
           </div>
           <p id="task-results-note" class="small-note">Each task has equal weight. The mean over all 40 tasks matches the overall results above; filtered means use only the selected tasks. EI task IDs correspond to HRI in the CSV.</p>
         </section>
-
     </section>
   </main>
   <footer class="site-footer container"><p>MotionForge · Anonymous supplementary material</p><div><a href="assets/paper.pdf" target="_blank" rel="noopener">Paper ↗</a><a href="assets/results.csv" download>Results CSV ↓</a><a href="#">Back to top ↑</a></div></footer>
