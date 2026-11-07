@@ -2,8 +2,7 @@
 """Validate task scores against both website summaries, then export display data.
 
 Run from the website directory with: python3 scripts/build_task_results.py
-The source CSV and its recorded scores remain unchanged. The export includes only
-EXPORT_COLUMNS; additional source metadata columns are not part of the display data.
+The source CSV remains unchanged. The export includes only EXPORT_COLUMNS.
 """
 
 import argparse
