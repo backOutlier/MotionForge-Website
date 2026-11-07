@@ -111,7 +111,7 @@ OOD captions identify the task and visible change; full settings remain in the m
 
 The task table contains 1,680 values across 40 tasks, six conditions, and seven models. It supports condition, scene, and task-horizon filters and provides a complete CSV download. Task names match the galleries; EI in the interface corresponds to HRI in the source CSV.
 
-The task table is generated from `../website_alignment_20260923/merged_id_ood_40tasks_website_aligned.csv`, a derived dataset adjusted and completed to match the website's aggregate targets. The exported `assets/task-results.csv` contains the condition, task, horizon, seven model values, and unit. Its numeric values match that input; the source notes and provenance columns are not included in the website export.
+The task table reports recorded experimental success rates, exported from `../website_alignment_20260923/merged_id_ood_40tasks_website_aligned.csv`. The scores are not adjusted or filled in to match aggregate targets. The exported `assets/task-results.csv` contains the condition, task, horizon, seven model values, and unit, preserving the numeric values in the input. Additional source metadata columns are not part of the website export.
 
 Overall values use an equal-weight mean across 40 tasks. Each condition contains ten tasks per scene, or 23 short-horizon and 17 long-horizon tasks. Group means must be weighted by their task counts when combined. The filtered table footer summarizes only the selected subset.
 
