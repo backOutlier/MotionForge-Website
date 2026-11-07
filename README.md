@@ -2,8 +2,6 @@
 
 A static website for MotionForge, featuring the benchmark, data generation pipeline, evaluation protocols, video galleries, and result tables.
 
-**[Open the website](https://backoutlier.github.io/MotionForge-Website/)**
-
 ## Website sections
 
 1. **Overview** — Research motivation, overview video, benchmark scale, and three main contributions.
