@@ -39,7 +39,7 @@ base_url: '/MotionForge-Website/'
 
 This path is applied on GitHub Pages domains. Local previews and anonymous mirrors retain relative paths. Update this value if the repository name changes.
 
-After pushing a commit, check **Actions → pages build and deployment** and wait for the deployment to complete before testing the published site. If the repository opens but the website does not, check the Pages deployment and use the website link above.
+After pushing a commit, check **Actions → pages build and deployment** and wait for the deployment to complete before testing the published site. If the repository opens but the website does not, check the Pages deployment.
 
 ## Media configuration
 
@@ -109,7 +109,7 @@ OOD captions identify the task and visible change; full settings remain in the m
 
 The task table contains 1,680 values across 40 tasks, six conditions, and seven models. It supports condition, scene, and task-horizon filters and provides a complete CSV download. Task names match the galleries; EI in the interface corresponds to HRI in the source CSV.
 
-The task table is generated from `../website_alignment_20260923/merged_id_ood_40tasks_website_aligned.csv`. The exported `assets/task-results.csv` contains the condition, task, horizon, seven model values, and unit.
+The task table is generated from a source CSV supplied to `scripts/build_task_results.py`. The exported `assets/task-results.csv` contains the condition, task, horizon, seven model values, and unit.
 
 Overall values use an equal-weight mean across 40 tasks. Each condition contains ten tasks per scene, or 23 short-horizon and 17 long-horizon tasks. Group means must be weighted by their task counts when combined. The filtered table footer summarizes only the selected subset.
 
@@ -125,7 +125,7 @@ The default source is outside this repository. To use another complete input fil
 python3 scripts/build_task_results.py --source /path/to/task-results.csv
 ```
 
-The script uses only the Python standard library. It checks completeness and compares all 42 task means against both `assets/results.csv` and `results.js` before writing the website data and `assets/task-results-verification.csv`. This checks arithmetic consistency, not independent experimental validity.
+The script uses only the Python standard library. It checks completeness and compares all 42 task means against both `assets/results.csv` and `results.js` before writing the website data and `assets/task-results-verification.csv`. The verification report records the arithmetic comparison of these task means and overall values.
 
 The table loads local JavaScript data, so filtering works both when opening `index.html` directly and when serving the site over HTTP. Keep `results.js` and the overall CSV synchronized when updating aggregate values.
 
